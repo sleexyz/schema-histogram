@@ -1,41 +1,28 @@
 // @flow
+import readline from 'readline';
 
 type Type = 'undefined'
           | 'number'
           | 'string'
           | 'null'
-          | [ Type ]
-          | { [key: string]: Type }
+          | 'array'
+          | 'object'
 
 type Bucket = {
   arrayChildren: Bucket | void,
-  objectChildren: { [key: string]: Bucket},
+  objectChildren: { [key: string]: Bucket} | void,
   counts: BucketCounts,
 };
 
-type BucketCounts = {
-  'undefined': number,
-  'number': number,
-  'string': number,
-  'null': number,
-  'array': number,
-  'object': number,
-};
+type BucketCounts = { [key: Type]: number };
 
 const makeNewBucket = (): Bucket => ({
   arrayChildren: undefined,
-  objectChildren: {},
-  counts: {
-    'undefined': 0,
-    'number': 0,
-    'string': 0,
-    'null': 0,
-    'array': 0,
-    'object': 0,
-  },
+  objectChildren: undefined,
+  counts: {},
 });
 
-const incrBucket = (key: $Keys<BucketCounts>, bucket: Bucket) => {
+const incrBucket = (key: Type, bucket: Bucket) => {
   const { arrayChildren, objectChildren, counts } = bucket;
   return {
     arrayChildren,
@@ -66,7 +53,6 @@ const addObjectItemToBucket = (key, item, bucket) => {
   return {
     arrayChildren,
     objectChildren: (() => {
-      let childBucket
       if (typeof objectChildren === 'undefined') {
         return {
           [key]: addToBucket(item, makeNewBucket()),
@@ -115,3 +101,17 @@ const addToBucket = (item, bucket) => {
 export const collect = (items: Array<*>): Bucket => {
   return items.reduce((bucket, item) => addToBucket(item, bucket), makeNewBucket());
 };
+
+export const main = ({ input, log }: { input: *, log: * }) => new Promise((resolve, reject) => {
+  const rl = readline.createInterface({ input });
+  let bucket = makeNewBucket();
+
+  rl.on('line', (line) => {
+    const item = JSON.parse(line);
+    bucket = addToBucket(item, bucket);
+  });
+  rl.on('close', () => {
+    log(JSON.stringify(bucket));
+    resolve();
+  });
+});
