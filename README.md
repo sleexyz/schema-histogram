@@ -1,3 +1,2 @@
-# Schema heat map
-
-document store schema analytics tool.
+# Schema Histogram
+A streaming document store schema-based analytics tool.
