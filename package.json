@@ -1,8 +1,8 @@
 {
-  "name": "schema-heatmap",
+  "name": "schema-histogram",
   "version": "1.0.0",
   "main": "index.js",
-  "repository": "github.com/sleexyz/schema-heatmap",
+  "repository": "github.com/sleexyz/schema-histogram",
   "author": "Sean Lee",
   "license": "MIT",
   "devDependencies": {
