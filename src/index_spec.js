@@ -51,7 +51,23 @@ describe('collect', function () {
   });
 
   describe('for object types', function () {
-    it ('returns the correct count');
-    it ('adds to the objectChildren bucket');
+    it ('returns the correct count', function () {
+      const input = [
+        { foo: 'asdf' },
+        { foo: 'bar' },
+      ];
+      const output = collect(input);
+      expect(output.counts.object).to.eql(2)
+    });
+
+    it ('adds to their respective objectChildren buckets', function () {
+      const input = [
+        { foo: 'asdf' },
+        { foo: 'rttt' , bar: 0 },
+      ];
+      const output = collect(input);
+      expect(output.objectChildren.foo.counts.string).to.eql(2);
+      expect(output.objectChildren.bar.counts.number).to.eql(1);
+    });
   });
 });

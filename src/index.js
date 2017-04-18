@@ -61,6 +61,32 @@ const addArrayItemToBucket = (item, bucket) => {
   };
 };
 
+const addObjectItemToBucket = (key, item, bucket) => {
+  const { arrayChildren, objectChildren, counts } = bucket;
+  return {
+    arrayChildren,
+    objectChildren: (() => {
+      let childBucket
+      if (typeof objectChildren === 'undefined') {
+        return {
+          [key]: addToBucket(item, makeNewBucket()),
+        };
+      }
+      if (typeof objectChildren[key] === 'undefined') {
+        return {
+          ...objectChildren,
+          [key]: addToBucket(item, makeNewBucket()),
+        };
+      }
+      return {
+        ...objectChildren,
+        [key]: addToBucket(item, objectChildren[key]),
+      };
+    })(),
+    counts,
+  };
+};
+
 const addToBucket = (item, bucket) => {
   if (typeof item === 'undefined') {
     return incrBucket('undefined', bucket);
@@ -75,12 +101,15 @@ const addToBucket = (item, bucket) => {
     return incrBucket('null', bucket);
   }
   if (Array.isArray(item)) {
-    const bucket1 = item.reduce((bucket, elem) => {
+    const modifiedBucket = item.reduce((bucket, elem) => {
       return addArrayItemToBucket(elem, bucket);
     }, bucket);
-    return incrBucket('array', bucket1);
+    return incrBucket('array', modifiedBucket);
   }
-  return incrBucket('object', bucket);
+  const modifiedBucket = Object.keys(item).reduce((bucket, key) => {
+    return addObjectItemToBucket(key, item[key], bucket);
+  }, bucket);
+  return incrBucket('object', modifiedBucket);
 };
 
 export const collect = (items: Array<*>): Bucket => {
